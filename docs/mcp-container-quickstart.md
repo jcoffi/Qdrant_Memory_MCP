@@ -1,34 +1,37 @@
 # MCP Container Quickstart
 
-Use this guide to run the memory server through Docker with a Python startup script that safely reuses existing containers.
+Use this guide to run the MCP server with `uvx` while starting a single Qdrant Docker container.
 
 ## What this does
 
-`scripts/start_mcp_server.py` is the MCP startup script. It will:
+`qdrant-memory-mcp` (from `uvx`) is the MCP startup command. It will:
 - Check Docker availability
-- Create the Docker network if needed
 - Start (or create) the `mcp-qdrant` container only when not already running
-- Start (or create) the `mcp-memory-runtime` container only when not already running
-- Launch `python memory_server.py` inside the runtime container over stdio using `docker exec -i`
+- Run the MCP server process directly in the uvx environment
 
-That means repeated launches are idempotent and do not create duplicate containers.
+The Qdrant start path is based on this command from the README flow:
+`docker run --pull-always -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant`
+
+That means repeated launches do not create duplicate Qdrant containers.
 
 ## Requirements
 
 - Docker installed and available on your PATH
-- Runtime image published at `ghcr.io/jcoffi/qdrant-memory-mcp:latest` (or set `MCP_IMAGE`)
+- `uvx` installed (`uv tool install uv` or from your package manager)
 
 ## MCP Configuration
 
-Point MCP to the startup script that launches the server:
+Point MCP to `uvx` and the package entrypoint:
 
 ```json
 {
   "mcpServers": {
     "memory-server": {
-      "command": "python3",
+      "command": "uvx",
       "args": [
-        "/absolute/path/to/Qdrant_Memory_MCP/scripts/start_mcp_server.py"
+        "--from",
+        "/absolute/path/to/Qdrant_Memory_MCP",
+        "qdrant-memory-mcp"
       ],
       "env": {
         "LOG_LEVEL": "INFO",
@@ -42,11 +45,9 @@ Point MCP to the startup script that launches the server:
 
 ## Optional environment variables
 
-- `MCP_IMAGE`: runtime image (default: `ghcr.io/jcoffi/qdrant-memory-mcp:latest`)
 - `QDRANT_IMAGE`: Qdrant image (default: `qdrant/qdrant:latest`)
-- `MCP_RUNTIME_CONTAINER`: runtime container name (default: `mcp-memory-runtime`)
 - `QDRANT_CONTAINER`: qdrant container name (default: `mcp-qdrant`)
-- `MCP_DOCKER_NETWORK`: network name (default: `mcp-memory-net`)
+- `QDRANT_STORAGE_DIR`: host path for storage bind mount (default: `$(pwd)/qdrant_storage`)
 - `QDRANT_PORT`: host port for Qdrant (default: `6333`)
 - `SKIP_QDRANT_START`: set to `1`/`true` to use external Qdrant instead of local container start
 
