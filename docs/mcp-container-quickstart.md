@@ -4,7 +4,7 @@ Use this guide to run the memory server through Docker with a Python startup scr
 
 ## What this does
 
-`scripts/start_mcp_container.py` will:
+`scripts/start_mcp_server.py` is the MCP startup script. It will:
 - Check Docker availability
 - Create the Docker network if needed
 - Start (or create) the `mcp-qdrant` container only when not already running
@@ -20,7 +20,7 @@ That means repeated launches are idempotent and do not create duplicate containe
 
 ## MCP Configuration
 
-Set your MCP config to call the Python startup script directly:
+Point MCP to the startup script that launches the server:
 
 ```json
 {
@@ -28,7 +28,7 @@ Set your MCP config to call the Python startup script directly:
     "memory-server": {
       "command": "python3",
       "args": [
-        "/absolute/path/to/Qdrant_Memory_MCP/scripts/start_mcp_container.py"
+        "/absolute/path/to/Qdrant_Memory_MCP/scripts/start_mcp_server.py"
       ],
       "env": {
         "LOG_LEVEL": "INFO",

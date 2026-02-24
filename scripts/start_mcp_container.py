@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Start or reuse Docker containers for the MCP memory server.
+"""Start or reuse Docker containers, then start the MCP server process.
 
-This script is designed to be used directly as an MCP command target.
-It ensures required containers are running before launching the stdio server
-process inside the runtime container.
+This script is designed to be used as the MCP startup script. It ensures
+required containers are running before launching the stdio server process
+inside the runtime container.
 """
 
 from __future__ import annotations
