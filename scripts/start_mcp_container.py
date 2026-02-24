@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List
 
 
@@ -31,6 +32,11 @@ PASSTHROUGH_ENV_VARS = [
     "UI_ONLY",
 ]
 
+README_QDRANT_RUN_COMMAND = (
+    "docker run --pull-always -p 6333:6333 "
+    "-v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant"
+)
+
 
 @dataclass(frozen=True)
 class LaunchConfig:
@@ -47,7 +53,9 @@ class CommandError(RuntimeError):
     """Raised when a docker command fails."""
 
 
-def run_command(command: List[str], check: bool = True) -> subprocess.CompletedProcess[str]:
+def run_command(
+    command: List[str], check: bool = True
+) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(command, capture_output=True, text=True)
     if check and result.returncode != 0:
         raise CommandError(
@@ -72,7 +80,9 @@ def container_exists(name: str) -> bool:
 
 
 def container_running(name: str) -> bool:
-    result = run_command(["docker", "inspect", "--format", "{{.State.Running}}", name], check=False)
+    result = run_command(
+        ["docker", "inspect", "--format", "{{.State.Running}}", name], check=False
+    )
     return result.returncode == 0 and result.stdout.strip() == "true"
 
 
@@ -106,16 +116,54 @@ def ensure_qdrant_container(config: LaunchConfig) -> None:
         return
 
     if container_exists(config.qdrant_container):
-        print(f"Starting existing container '{config.qdrant_container}'...", file=sys.stderr)
+        print(
+            f"Starting existing container '{config.qdrant_container}'...",
+            file=sys.stderr,
+        )
         run_command(["docker", "start", config.qdrant_container])
         return
 
-    print(f"Creating and starting container '{config.qdrant_container}'...", file=sys.stderr)
-    run_command(
-        [
+    storage_dir = Path.cwd() / "qdrant_storage"
+    storage_dir.mkdir(parents=True, exist_ok=True)
+
+    print(
+        f"Creating and starting container '{config.qdrant_container}'...",
+        file=sys.stderr,
+    )
+    print(f"Base command: {README_QDRANT_RUN_COMMAND}", file=sys.stderr)
+
+    run_command_with_pull_always = [
+        "docker",
+        "run",
+        "-d",
+        "--pull-always",
+        "--name",
+        config.qdrant_container,
+        "--network",
+        config.network,
+        "--restart",
+        "unless-stopped",
+        "-p",
+        f"{config.qdrant_port}:6333",
+        "-p",
+        "6334:6334",
+        "-v",
+        f"{storage_dir}:/qdrant/storage",
+        config.qdrant_image,
+    ]
+
+    try:
+        run_command(run_command_with_pull_always)
+    except CommandError as exc:
+        if "unknown flag: --pull-always" not in str(exc):
+            raise
+
+        run_command_with_pull_flag = [
             "docker",
             "run",
             "-d",
+            "--pull",
+            "always",
             "--name",
             config.qdrant_container,
             "--network",
@@ -127,10 +175,10 @@ def ensure_qdrant_container(config: LaunchConfig) -> None:
             "-p",
             "6334:6334",
             "-v",
-            "mcp-qdrant-storage:/qdrant/storage",
+            f"{storage_dir}:/qdrant/storage",
             config.qdrant_image,
         ]
-    )
+        run_command(run_command_with_pull_flag)
 
 
 def ensure_runtime_container(config: LaunchConfig) -> None:
@@ -138,12 +186,18 @@ def ensure_runtime_container(config: LaunchConfig) -> None:
         return
 
     if container_exists(config.runtime_container):
-        print(f"Starting existing container '{config.runtime_container}'...", file=sys.stderr)
+        print(
+            f"Starting existing container '{config.runtime_container}'...",
+            file=sys.stderr,
+        )
         run_command(["docker", "start", config.runtime_container])
         return
 
     ensure_image(config.image)
-    print(f"Creating and starting container '{config.runtime_container}'...", file=sys.stderr)
+    print(
+        f"Creating and starting container '{config.runtime_container}'...",
+        file=sys.stderr,
+    )
     run_command(
         [
             "docker",
