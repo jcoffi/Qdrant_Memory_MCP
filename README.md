@@ -163,20 +163,20 @@ Alternatively, you can run the server using Poetry:
 poetry run python server.py
 ```
 
-### Container MCP Startup (Python Script)
+### Container MCP Startup (uvx)
 
-- `scripts/start_mcp_server.py` is provided as a convenience MCP startup script for container-based deployments.
-- The script checks for and reuses existing Docker containers when possible before creating new ones.
-- When the container is already running the MCP, the script attaches to the running process and starts MCP stdio via `docker exec` so Cursor can communicate over stdin/stdout.
+- Use `uvx` to launch `qdrant-memory-mcp` directly from this repo.
+- Startup checks for an existing `mcp-qdrant` container and only creates one when missing.
+- Qdrant startup is based on `docker run --pull-always -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant`.
 
-Example Cursor MCP config pointing to the Python startup script:
+Example Cursor MCP config using uvx:
 
 ```json
 {
   "mcpServers": {
     "memory-server-container": {
-      "command": "python3",
-      "args": ["scripts/start_mcp_server.py"],
+      "command": "uvx",
+      "args": ["--from", "/absolute/path/to/Qdrant_Memory_MCP", "qdrant-memory-mcp"],
       "cwd": "./",
       "env": {
         "QDRANT_HOST": "localhost",
@@ -255,24 +255,12 @@ Store lessons learned to avoid repeated mistakes.
 
 ### 4. `add_to_agent_memory`
 
-Add content to agent-specific memory.
+Store lessons learned to avoid repeated mistakes.
 
 **Parameters:**
-- `agent_id` (string): Target agent identifier
-- `file_path` (string): Path to markdown file
-- `description` (string, optional): Content description
-
-**Example:**
-```json
-{
-  "tool": "add_to_agent_memory",
-  "arguments": {
-    "agent_id": "backend_dev",
-    "file_path": "./docs/api_patterns.md",
-    "description": "Backend API design patterns"
-  }
-}
-```
+- `file_path` (string): Path to markdown file with lessons
+- `lesson_type` (string): Type of lesson (e.g., "deployment", "security")
+- `description` (string, optional): Lesson description
 
 ### 5. `query_memory`
 
@@ -374,6 +362,14 @@ python server.py
 - Check firewall settings
 - Verify API key if using Qdrant Cloud
 
+**Embedding Model Download Issues**n- **Qdrant Connection Failed**
+```
+❌ Failed to initialize Qdrant: ConnectionError
+```
+- Ensure Qdrant is running on configured host/port
+- Check firewall settings
+- Verify API key if using Qdrant Cloud
+
 **Embedding Model Download Issues**
 ```
 ❌ Failed to load embedding model
@@ -381,24 +377,6 @@ python server.py
 - Ensure internet connection for first download
 - Check available disk space (models can be large)
 - Try alternative model in configuration
-
-**Memory Full / Performance Issues**
-- Reduce `EMBEDDING_DIMENSION` for smaller models
-- Increase `SIMILARITY_THRESHOLD` to reduce results
-- Consider pruning old content from collections
-
-### Debugging
-
-Enable debug logging:
-```bash
-export LOG_LEVEL=DEBUG
-python server.py
-```
-
-Check Qdrant collections:
-```bash
-curl http://localhost:6333/collections
-```
 
 ## Configuration Reference
 
