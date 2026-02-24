@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""MCP startup script for containerized memory server.
-
-This is the script intended to be used as the MCP command target.
-It delegates to start_mcp_container.py, which ensures required
-containers are running and then launches MCP stdio inside runtime.
-"""
+"""MCP startup script that delegates to the local container launcher."""
 
 from __future__ import annotations
 
