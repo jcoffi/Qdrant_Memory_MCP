@@ -163,6 +163,33 @@ Alternatively, you can run the server using Poetry:
 poetry run python server.py
 ```
 
+### Container MCP Startup (Python Script)
+
+- `scripts/start_mcp_server.py` is provided as a convenience MCP startup script for container-based deployments.
+- The script checks for and reuses existing Docker containers when possible before creating new ones.
+- When the container is already running the MCP, the script attaches to the running process and starts MCP stdio via `docker exec` so Cursor can communicate over stdin/stdout.
+
+Example Cursor MCP config pointing to the Python startup script:
+
+```json
+{
+  "mcpServers": {
+    "memory-server-container": {
+      "command": "python3",
+      "args": ["scripts/start_mcp_server.py"],
+      "cwd": "./",
+      "env": {
+        "QDRANT_HOST": "localhost",
+        "QDRANT_PORT": "6333",
+        "EMBEDDING_MODEL": "all-MiniLM-L6-v2"
+      }
+    }
+  }
+}
+```
+
+See `docs/mcp-container-quickstart.md` for advanced options and configuration.
+
 ## MCP Tools
 
 ### 1. `set_agent_context`
