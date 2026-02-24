@@ -106,7 +106,7 @@ class SystemAndCollectionsHandlers:
             elif len(component_issues) == len(health_info["components"]):
                 overall_status = "critical"
                 status_text = (
-                    f"❌ Critical: All components have issues: "
+                    f"✖ Critical: All components have issues: "
                     f"{', '.join(component_issues)}"
                 )
             else:
@@ -124,8 +124,8 @@ class SystemAndCollectionsHandlers:
 ## Component Status
 
 ### Memory Manager
-- **Available:** {"✅" if health_info["memory_manager"]["available"] else "❌"}
-- **Initialized:** {"✅" if health_info["memory_manager"]["initialized"] else "❌"}
+- **Available:** {"✅" if health_info["memory_manager"]["available"] else "✖"}
+- **Initialized:** {"✅" if health_info["memory_manager"]["initialized"] else "✖"}
 
 ### Components
 """
@@ -138,7 +138,7 @@ class SystemAndCollectionsHandlers:
                     elif status == "unavailable":
                         status_icon = "⚠️"
                     else:
-                        status_icon = "❌"
+                        status_icon = "✖"
 
                     health_text += (
                         f"- **{component.replace('_', ' ').title()}:** "
@@ -150,7 +150,7 @@ class SystemAndCollectionsHandlers:
                 else:
                     health_text += (
                         f"- **{component.replace('_', ' ').title()}:** "
-                        f"{ '✅' if info else '❌' }\n"
+                        f"{'' if info else '✖'}\n"
                     )
 
             # Add error statistics if available
@@ -175,7 +175,7 @@ class SystemAndCollectionsHandlers:
             return {
                 "isError": True,
                 "content": [
-                    {"type": "text", "text": f"❌ Health check failed: {str(e)}"}
+                    {"type": "text", "text": f"✖ Health check failed: {str(e)}"}
                 ],
             }
 
@@ -361,7 +361,7 @@ class SystemAndCollectionsHandlers:
                     f"No results found in collection '{collection_name}' "
                     f"for query: '{query}'"
                 )
-            else:
+                else:
                 result_text = (
                     f"Found {len(results)} results in collection "
                     f"'{collection_name}':\n\n"
@@ -408,8 +408,7 @@ class SystemAndCollectionsHandlers:
                     "isError": True,
                     "content": [
                         {
-                            "type": "text",
-                            "text": (
+                            "type": "text", "text": (
                                 "Confirmation required: set 'confirm' to true "
                                 "to delete the collection"
                             ),
@@ -475,8 +474,7 @@ class SystemAndCollectionsHandlers:
                 "isError": True,
                 "content": [
                     {
-                        "type": "text",
-                        "text": f"Failed to get collection stats: {str(e)}",
+                        "type": "text", "text": f"Failed to get collection stats: {str(e)}",
                     }
                 ],
             }

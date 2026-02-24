@@ -6,7 +6,7 @@ A Model Context Protocol (MCP) server that provides intelligent memory managemen
 
 ## 🌟 Complete Feature Set
 
-🧠 **Multiple Memory Types**
+🤖 **Multiple Memory Types**
 - **Global Memory**: Shared across all agents for common knowledge
 - **Learned Memory**: Lessons learned and mistakes to avoid  
 - **Agent-Specific Memory**: Individual agent contexts and specialized knowledge
@@ -40,19 +40,19 @@ A Model Context Protocol (MCP) server that provides intelligent memory managemen
 ## Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+┌────────────────────┐    ┌────────────────────┐    ┌────────────────────┐
 │                 │    │                  │    │                 │
-│   Cursor IDE    │◄──►│  MCP Server      │◄──►│  Qdrant Vector  │
-│                 │    │  (stdin/stdout)  │    │  Database       │
+│   Cursor IDE    │◄───►│  MCP Server      │◄───►│  Qdrant Vector   │
+│                 │    │  (stdin/stdout)  │    │  Database        │
 │                 │    │                  │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+└────────────────────┘    └────────────────────┘    └────────────────────┘
                                 │
                                 ▼
-                       ┌──────────────────┐
-                       │ Sentence         │
-                       │ Transformers     │
-                       │ (Embeddings)     │
-                       └──────────────────┘
+                       ┌────────────────────┐
+                       │ Sentence           │
+                       │ Transformers       │
+                       │ (Embeddings)       │
+                       └────────────────────┘
 ```
 
 ## Installation
@@ -98,7 +98,7 @@ cp .env.example .env
 
 2. Edit `.env` with your settings:
 ```env
-# Qdrant Configuration
+# QDRANT Configuration
 QDRANT_HOST=localhost
 QDRANT_PORT=6333
 QDRANT_API_KEY=
@@ -247,10 +247,225 @@ Store lessons learned to avoid repeated mistakes.
   "tool": "add_to_learned_memory",
   "arguments": {
     "file_path": "./lessons/deployment_issues.md", 
-  "lesson_type": "deployment",
-  "description": "Critical deployment lessons"
+    "lesson_type": "deployment",
+    "description": "Critical deployment lessons"
   }
 }
 ```
 
-... (content truncated for brevity) ...
+### 4. `add_to_agent_memory`
+
+Add content to agent-specific memory.
+
+**Parameters:**
+- `agent_id` (string): Target agent identifier
+- `file_path` (string): Path to markdown file
+- `description` (string, optional): Content description
+
+**Example:**
+```json
+{
+  "tool": "add_to_agent_memory",
+  "arguments": {
+    "agent_id": "backend_dev",
+    "file_path": "./docs/api_patterns.md",
+    "description": "Backend API design patterns"
+  }
+}
+```
+
+### 5. `query_memory`
+
+Search memory collections for relevant content.
+
+**Parameters:**
+- `query` (string): Search query
+- `memory_type` (string): "global", "learned", "agent", or "all" 
+- `agent_id` (string, optional): Agent ID for agent-specific queries
+- `max_results` (integer, optional): Maximum results (default: 10)
+
+**Example:**
+```json
+{
+  "tool": "query_memory",
+  "arguments": {
+    "query": "authentication best practices",
+    "memory_type": "all",
+    "max_results": 5
+  }
+}
+```
+
+### 6. `compare_against_learned_memory`
+
+Check proposed actions against past lessons learned.
+
+**Parameters:**
+- `action_description` (string): Description of proposed action
+- `agent_id` (string, optional): Agent making the request
+
+**Example:**
+```json
+{
+  "tool": "compare_against_learned_memory",
+  "arguments": {
+    "action_description": "Deploy database migration on Friday afternoon",
+    "agent_id": "devops_agent"
+  }
+}
+```
+
+## Memory Types Explained
+
+### Global Memory
+- **Purpose**: Store knowledge shared across all agents
+- **Content**: Coding standards, documentation, best practices
+- **Access**: All agents can query this memory
+- **Use Case**: Company-wide policies, architectural decisions
+
+### Learned Memory  
+- **Purpose**: Store lessons learned from past mistakes
+- **Content**: Incident reports, post-mortems, anti-patterns
+- **Access**: Most agents (exclude "human-like" testers)
+- **Use Case**: Avoid repeating past mistakes, improve decisions
+
+### Agent-Specific Memory
+- **Purpose**: Store knowledge specific to individual agents
+- **Content**: Role definitions, specialized knowledge, context
+- **Access**: Only the specific agent
+- **Use Case**: Agent initialization, specialized expertise
+
+## Testing
+
+### Run Basic Functionality Tests
+
+```bash
+python tests/test_basic_functionality.py
+```
+
+This will test:
+- Qdrant connection and collection setup
+- Memory operations (add, query, duplicate detection)
+- Markdown processing and content cleaning
+- Vector embedding and similarity search
+
+### Manual Testing with Sample Data
+
+1. Start the server:
+```bash
+python server.py
+```
+
+2. Use the provided sample markdown files in `sample_data/`:
+   - `frontend_agent_context.md`: Frontend agent context
+   - `backend_agent_context.md`: Backend agent context  
+   - `deployment_lessons.md`: Learned lessons
+   - `global_standards.md`: Global development standards
+
+## Troubleshooting
+
+### Common Issues
+
+**Qdrant Connection Failed**
+```
+✖ Failed to initialize Qdrant: ConnectionError
+```
+- Ensure Qdrant is running on configured host/port
+- Check firewall settings
+- Verify API key if using Qdrant Cloud
+
+**Embedding Model Download Issues**
+```
+✖ Failed to load embedding model
+```
+- Ensure internet connection for first download
+- Check available disk space (models can be large)
+- Try alternative model in configuration
+
+**Memory Full / Performance Issues**
+- Reduce `EMBEDDING_DIMENSION` for smaller models
+- Increase `SIMILARITY_THRESHOLD` to reduce results
+- Consider pruning old content from collections
+
+### Debugging
+
+Enable debug logging:
+```bash
+export LOG_LEVEL=DEBUG
+python server.py
+```
+
+Check Qdrant collections:
+```bash
+curl http://localhost:6333/collections
+```
+
+## Configuration Reference
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `QDRANT_HOST` | localhost | Qdrant server host |
+| `QDRANT_PORT` | 6333 | Qdrant server port |
+| `QDRANT_API_KEY` | | API key for Qdrant Cloud |
+| `EMBEDDING_MODEL` | all-MiniLM-L6-v2 | Sentence transformer model |
+| `EMBEDDING_DIMENSION` | 384 | Vector dimension size |
+| `SIMILARITY_THRESHOLD` | 0.8 | Duplicate detection threshold |
+| `MAX_RESULTS` | 10 | Default max query results |
+| `DEFAULT_AGENT_ID` | default | Default agent identifier |
+| `LOG_LEVEL` | INFO | Logging verbosity |
+
+### Collection Names
+
+- **Global Memory**: `global_memory`
+- **Learned Memory**: `learned_memory`  
+- **Agent Memory**: `agent_specific_memory_{agent_id}`
+
+## Development
+
+### Project Structure
+
+```
+mcp-memory-server/
+├── server.py                 # Main MCP server
+├── src/
+│   ├── __init__.py
+│   ├── config.py             # Configuration management
+│   ├── memory_manager.py     # Qdrant operations
+│   └── markdown_processor.py # Markdown handling
+├── tests/
+│   └── test_basic_functionality.py
+├── sample_data/              # Example markdown files
+├── docs/                     # Additional documentation
+├── requirements.txt          # Python dependencies
+├── pyproject.toml           # Poetry configuration
+└── README.md                # This file
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `python -m pytest tests/`
+5. Submit a pull request
+
+### Adding New Tools
+
+1. Add tool function to `MCPMemoryServer._register_tools()`
+2. Update `_list_tools()` method with tool schema
+3. Add tests for the new functionality
+4. Update this README
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Support
+
+For issues and questions:
+1. Check the troubleshooting section above
+2. Review Qdrant documentation for database issues
+3. Check MCP protocol documentation for integration issues
+4. Open an issue with detailed logs and configuration

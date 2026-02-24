@@ -70,7 +70,7 @@ class GenericMemoryService:
             return {"success": True, "message": "Memory service initialized"}
 
         except Exception as e:
-            logger.error(f"❌ Failed to initialize memory service: {e}")
+            logger.error(f"✖ Failed to initialize memory service: {e}")
             return {"success": False, "error": str(e)}
 
     def set_user_context(self, user_id: str) -> None:
@@ -282,7 +282,7 @@ class GenericMemoryService:
             }
 
         except Exception as e:
-            logger.error(f"❌ Failed to add memory: {e}")
+            logger.error(f"✖ Failed to add memory: {e}")
             return {"success": False, "error": str(e)}
 
     async def search_memory(
@@ -375,7 +375,7 @@ class GenericMemoryService:
             }
 
         except Exception as e:
-            logger.error(f"❌ Failed to search memory: {e}")
+            logger.error(f"✖ Failed to search memory: {e}")
             return {"success": False, "error": str(e)}
 
     async def get_memory(self, memory_id: str, collection: str) -> Dict[str, Any]:
@@ -400,7 +400,7 @@ class GenericMemoryService:
                 return {"success": False, "error": "Memory not found"}
 
         except Exception as e:
-            logger.error(f"❌ Failed to get memory: {e}")
+            logger.error(f"✖ Failed to get memory: {e}")
             return {"success": False, "error": str(e)}
 
     async def delete_memory(self, memory_id: str, collection: str) -> Dict[str, Any]:
@@ -416,7 +416,7 @@ class GenericMemoryService:
             return {"success": True, "message": "Memory deleted successfully"}
 
         except Exception as e:
-            logger.error(f"❌ Failed to delete memory: {e}")
+            logger.error(f"✖ Failed to delete memory: {e}")
             return {"success": False, "error": str(e)}
 
     # Collection Statistics & Analytics
@@ -482,7 +482,7 @@ class GenericMemoryService:
             return stats
 
         except Exception as e:
-            logger.error(f"❌ Failed to get collection stats: {e}")
+            logger.error(f"✖ Failed to get collection stats: {e}")
             return {"success": False, "error": str(e)}
 
     # =================================================================
@@ -525,7 +525,7 @@ class GenericMemoryService:
                 return result
 
         except Exception as e:
-            logger.error(f"❌ add_to_global_memory failed: {e}")
+            logger.error(f"✖ add_to_global_memory failed: {e}")
             return {"success": False, "error": str(e)}
 
     def add_to_learned_memory(
@@ -564,7 +564,7 @@ class GenericMemoryService:
                 return result
 
         except Exception as e:
-            logger.error(f"❌ add_to_learned_memory failed: {e}")
+            logger.error(f"✖ add_to_learned_memory failed: {e}")
             return {"success": False, "error": str(e)}
 
     def add_to_agent_memory(
@@ -625,7 +625,7 @@ class GenericMemoryService:
                 return result
 
         except Exception as e:
-            logger.error(f"❌ add_to_agent_memory failed: {e}")
+            logger.error(f"✖ add_to_agent_memory failed: {e}")
             return {"success": False, "error": str(e)}
 
     def query_memory(
@@ -705,7 +705,7 @@ class GenericMemoryService:
                 return result
 
         except Exception as e:
-            logger.error(f"❌ query_memory failed: {e}")
+            logger.error(f"✖ query_memory failed: {e}")
             return {"success": False, "error": str(e)}
 
     def compare_against_learned_memory(
@@ -756,7 +756,7 @@ class GenericMemoryService:
                 return result
 
         except Exception as e:
-            logger.error(f"❌ compare_against_learned_memory failed: {e}")
+            logger.error(f"✖ compare_against_learned_memory failed: {e}")
             return {"success": False, "error": str(e)}
 
     # Helper methods

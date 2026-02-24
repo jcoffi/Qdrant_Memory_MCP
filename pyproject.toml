@@ -24,7 +24,7 @@ pyyaml = "^6.0.0"
 PySide6 = "^6.7.0"        # Qt6 Python bindings for desktop UI
 requests = "^2.32.1"      # For HTTP communication (fallback)
 websockets = "^12.0"      # WebSocket client for real-time updates
-aiohttp = "^3.9.1"      # Async HTTP client for MCP communication
+aiohttp = "^3.9.1"        # Async HTTP client for MCP communication
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
