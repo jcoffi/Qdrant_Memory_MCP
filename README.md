@@ -175,9 +175,13 @@ Example Cursor MCP config using uvx:
 {
   "mcpServers": {
     "memory-server-container": {
-      "command": "uvx",
-      "args": ["--from", "/absolute/path/to/Qdrant_Memory_MCP", "qdrant-memory-mcp"],
-      "cwd": "./",
+      "command": [
+        "/snap/bin/uvx",
+        "--refresh",
+        "--from",
+        "git+https://github.com/jcoffi/Qdrant_Memory_MCP",
+        "qdrant-memory-mcp"
+      ],
       "env": {
         "QDRANT_HOST": "localhost",
         "QDRANT_PORT": "6333",
