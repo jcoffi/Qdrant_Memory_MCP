@@ -274,6 +274,50 @@ Add content to agent-specific memory.
 }
 ```
 
+### 5. `query_memory`
+
+Search and retrieve relevant information from memory.
+
+**Parameters:**
+- `query` (string, required): Search query text
+- `memory_types` (array[string], optional): Memory types to search (defaults to all)
+- `limit` (number, optional): Maximum number of results (default `10`)
+- `min_score` (number, optional): Minimum similarity score from `0.0` to `1.0` (default `0.3`)
+
+**Example:**
+```json
+{
+  "tool": "query_memory",
+  "arguments": {
+    "query": "rate limit incident",
+    "memory_types": ["global", "learned"],
+    "limit": 5,
+    "min_score": 0.35
+  }
+}
+```
+
+### 6. `compare_against_learned_memory`
+
+Compare a current situation against learned patterns and prior insights.
+
+**Parameters:**
+- `situation` (string, required): Current context or situation to compare
+- `comparison_type` (string, optional): Comparison mode/type
+- `limit` (number, optional): Maximum number of similar patterns to return (default `5`)
+
+**Example:**
+```json
+{
+  "tool": "compare_against_learned_memory",
+  "arguments": {
+    "situation": "Error rate spikes after deployment",
+    "comparison_type": "incident_pattern",
+    "limit": 5
+  }
+}
+```
+
 ## Memory Types Explained
 
 ### Global Memory
