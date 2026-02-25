@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "MCP Server with Qdrant Vector Database Memory System for Cursor"
 authors = ["Hannes <hannes@example.com>"]
 readme = "README.md"
-package-mode = false
+packages = [{ include = "src" }]
+
+[tool.poetry.scripts]
+qdrant-memory-mcp = "src.mcp_container_launcher:main"
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"

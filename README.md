@@ -163,6 +163,33 @@ Alternatively, you can run the server using Poetry:
 poetry run python server.py
 ```
 
+### Container MCP Startup (uvx)
+
+- Use `uvx` to launch `qdrant-memory-mcp` directly from this repo.
+- Startup checks for an existing `mcp-qdrant` container and only creates one when missing.
+- Qdrant startup is based on `docker run --pull-always -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant`.
+
+Example Cursor MCP config using uvx:
+
+```json
+{
+  "mcpServers": {
+    "memory-server-container": {
+      "command": "uvx",
+      "args": ["--from", "/absolute/path/to/Qdrant_Memory_MCP", "qdrant-memory-mcp"],
+      "cwd": "./",
+      "env": {
+        "QDRANT_HOST": "localhost",
+        "QDRANT_PORT": "6333",
+        "EMBEDDING_MODEL": "all-MiniLM-L6-v2"
+      }
+    }
+  }
+}
+```
+
+See `docs/mcp-container-quickstart.md` for advanced options and configuration.
+
 ## MCP Tools
 
 ### 1. `set_agent_context`
@@ -249,41 +276,44 @@ Add content to agent-specific memory.
 
 ### 5. `query_memory`
 
-Search memory collections for relevant content.
+Search and retrieve relevant information from memory.
 
 **Parameters:**
-- `query` (string): Search query
-- `memory_type` (string): "global", "learned", "agent", or "all" 
-- `agent_id` (string, optional): Agent ID for agent-specific queries
-- `max_results` (integer, optional): Maximum results (default: 10)
+- `query` (string, required): Search query text
+- `memory_types` (array[string], optional): Memory types to search (defaults to all)
+- `limit` (number, optional): Maximum number of results (default `10`)
+- `min_score` (number, optional): Minimum similarity score from `0.0` to `1.0` (default `0.3`)
 
 **Example:**
 ```json
 {
   "tool": "query_memory",
   "arguments": {
-    "query": "authentication best practices",
-    "memory_type": "all",
-    "max_results": 5
+    "query": "rate limit incident",
+    "memory_types": ["global", "learned"],
+    "limit": 5,
+    "min_score": 0.35
   }
 }
 ```
 
 ### 6. `compare_against_learned_memory`
 
-Check proposed actions against past lessons learned.
+Compare a current situation against learned patterns and prior insights.
 
 **Parameters:**
-- `action_description` (string): Description of proposed action
-- `agent_id` (string, optional): Agent making the request
+- `situation` (string, required): Current context or situation to compare
+- `comparison_type` (string, optional): Comparison mode/type
+- `limit` (number, optional): Maximum number of similar patterns to return (default `5`)
 
 **Example:**
 ```json
 {
   "tool": "compare_against_learned_memory",
   "arguments": {
-    "action_description": "Deploy database migration on Friday afternoon",
-    "agent_id": "devops_agent"
+    "situation": "Error rate spikes after deployment",
+    "comparison_type": "incident_pattern",
+    "limit": 5
   }
 }
 ```
