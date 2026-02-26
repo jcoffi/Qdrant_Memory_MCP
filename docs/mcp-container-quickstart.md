@@ -10,7 +10,7 @@ Use this guide to run the MCP server with `uvx` while starting a single Qdrant D
 - Run the MCP server process directly in the uvx environment
 
 The Qdrant start path is based on this command from the README flow:
-`docker run --pull-always -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant`
+`docker run --pull-always -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant:1.16`
 
 That means repeated launches do not create duplicate Qdrant containers.
 
@@ -45,7 +45,7 @@ Point MCP to `uvx` and the package entrypoint:
 
 ## Optional environment variables
 
-- `QDRANT_IMAGE`: Qdrant image (default: `qdrant/qdrant:latest`)
+- `QDRANT_IMAGE`: Qdrant image (default: `qdrant/qdrant:1.16`)
 - `QDRANT_CONTAINER`: qdrant container name (default: `mcp-qdrant`)
 - `QDRANT_STORAGE_DIR`: host path for storage bind mount (default: `$(pwd)/qdrant_storage`)
 - `QDRANT_PORT`: host port for Qdrant (default: `6333`)
