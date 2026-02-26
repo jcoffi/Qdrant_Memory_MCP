@@ -68,7 +68,7 @@ A Model Context Protocol (MCP) server that provides intelligent memory managemen
 Using Docker (recommended):
 
 ```bash
-docker run -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant:1.16
+docker run -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant:v1.16.0
 ```
 
 Or install Qdrant locally following their [installation guide](https://qdrant.tech/documentation/quick-start/).
@@ -167,7 +167,7 @@ poetry run python server.py
 
 - Use `uvx` to launch `qdrant-memory-mcp` directly from this repo.
 - Startup checks for an existing `mcp-qdrant` container and only creates one when missing.
-- Qdrant startup is based on `docker run --pull-always -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant:1.16`.
+- Qdrant startup is based on `docker run --pull-always -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant:v1.16.0`.
 
 Example Cursor MCP config using uvx:
 

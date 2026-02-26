@@ -16,7 +16,7 @@ from src.mcp_server import run_mcp_server
 
 README_QDRANT_RUN_COMMAND = (
     "docker run --pull-always -p 6333:6333 "
-    "-v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant:1.16"
+    "-v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant:v1.16.0"
 )
 
 
@@ -142,7 +142,7 @@ def parse_args() -> LaunchConfig:
     )
     parser.add_argument(
         "--qdrant-image",
-        default=os.environ.get("QDRANT_IMAGE", "qdrant/qdrant:1.16"),
+        default=os.environ.get("QDRANT_IMAGE", "qdrant/qdrant:v1.16.0"),
         help="Qdrant image to use when creating the local Qdrant container",
     )
     parser.add_argument(

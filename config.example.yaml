@@ -19,7 +19,7 @@ qdrant:
   timeout: 60
   
   # Docker settings (for local mode)
-  docker_image: "qdrant/qdrant:1.16"
+  docker_image: "qdrant/qdrant:v1.16.0"
   container_name: "qdrant"
   
   # Timeouts
