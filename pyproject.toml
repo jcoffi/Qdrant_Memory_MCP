@@ -12,7 +12,7 @@ qdrant-memory-mcp = "src.mcp_container_launcher:main"
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
 mcp = "^1.13.1"
-qdrant-client = ">=1.7.0,<1.17.0"
+qdrant-client = ">=1.7.0,<1.16.0"
 sentence-transformers = "^2.5.1"
 numpy = "^1.26.0"
 python-dotenv = "^1.0.0"
