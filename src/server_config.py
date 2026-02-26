@@ -36,12 +36,12 @@ class QdrantConfig:
     port: int = 6333
     api_key: Optional[str] = None
     timeout: int = 60
-    
+
     # Docker settings (for local mode)
-    docker_image: str = "qdrant/qdrant:latest"
+    docker_image: str = "qdrant/qdrant:1.16"
     container_name: str = "qdrant"
     docker_ports: list = field(default_factory=lambda: ["6333:6333", "6334:6334"])
-    
+
     # Timeouts
     startup_timeout: int = 15
     health_check_timeout: int = 5
@@ -62,14 +62,14 @@ class MarkdownConfig:
     chunk_size: int = 900
     chunk_overlap: int = 200
     recursive_processing: bool = True
-    
+
     # AI enhancement settings
     ai_enhancement_enabled: bool = True
     ai_analysis_depth: str = "standard"  # basic, standard, deep
     ai_content_optimization: bool = True
 
 
-@dataclass 
+@dataclass
 class PolicyConfig:
     """Policy management configuration."""
     directory: str = "./policy"
@@ -111,12 +111,12 @@ class ServerConfig:
     name: str = "memory-server"
     version: str = "1.0.0"
     description: str = "Memory management server for AI agents using Qdrant vector database"
-    
+
     # Logging
     log_level: LogLevel = LogLevel.INFO
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     log_file: Optional[str] = None
-    
+
     # Component configurations
     qdrant: QdrantConfig = field(default_factory=QdrantConfig)
     embedding: EmbeddingConfig = field(default_factory=EmbeddingConfig)
@@ -125,14 +125,14 @@ class ServerConfig:
     memory: MemoryConfig = field(default_factory=MemoryConfig)
     deduplication: DeduplicationConfig = field(default_factory=DeduplicationConfig)
     error_handling: ErrorHandlingConfig = field(default_factory=ErrorHandlingConfig)
-    
+
     # MCP Protocol settings
     protocol_version: str = "2024-11-05"
 
 
 class ConfigManager:
     """Enhanced configuration manager with YAML support and validation."""
-    
+
     def __init__(self, config_path: Optional[Union[str, Path]] = None):
         self.config_path = Path(config_path) if config_path else None
         self.config = ServerConfig()
@@ -142,11 +142,11 @@ class ConfigManager:
     def _load_config(self):
         """Load configuration from various sources with precedence."""
         # 1. Load default values (already set in ServerConfig)
-        
+
         # 2. Load from YAML file if specified
         if self.config_path and self.config_path.exists():
             self._load_yaml_config()
-        
+
         # 3. Override with environment variables
         self._load_env_config()
 
@@ -155,14 +155,14 @@ class ConfigManager:
         try:
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 yaml_data = yaml.safe_load(f)
-            
+
             if not yaml_data:
                 return
-            
+
             # Update configuration with YAML data
             self._update_config_from_dict(yaml_data)
             logging.getLogger(__name__).info(f"Loaded config from {self.config_path}")
-            
+
         except Exception as e:
             logging.getLogger(__name__).error(f"Failed to load config from {self.config_path}: {e}")
             raise
@@ -178,7 +178,7 @@ class ConfigManager:
                 self.config.version = server_data['version']
             if 'description' in server_data:
                 self.config.description = server_data['description']
-        
+
         # Update logging settings
         if 'logging' in data:
             log_data = data['logging']
@@ -188,7 +188,7 @@ class ConfigManager:
                 self.config.log_format = log_data['format']
             if 'file' in log_data:
                 self.config.log_file = log_data['file']
-        
+
         # Update Qdrant settings
         if 'qdrant' in data:
             qdrant_data = data['qdrant']
@@ -202,7 +202,7 @@ class ConfigManager:
                 self.config.qdrant.api_key = qdrant_data['api_key']
             if 'timeout' in qdrant_data:
                 self.config.qdrant.timeout = qdrant_data['timeout']
-        
+
         # Update embedding settings
         if 'embedding' in data:
             emb_data = data['embedding']
@@ -210,7 +210,7 @@ class ConfigManager:
                 self.config.embedding.model_name = emb_data['model_name']
             if 'device' in emb_data:
                 self.config.embedding.device = emb_data['device']
-        
+
         # Update other component settings similarly...
         # (Additional sections can be added as needed)
 
@@ -219,66 +219,66 @@ class ConfigManager:
         # Server settings
         if os.getenv('MCP_SERVER_NAME'):
             self.config.name = os.getenv('MCP_SERVER_NAME')
-        
+
         # Logging settings
         if os.getenv('LOG_LEVEL'):
             try:
                 self.config.log_level = LogLevel(os.getenv('LOG_LEVEL').upper())
             except ValueError:
                 pass
-        
+
         if os.getenv('LOG_FILE'):
             self.config.log_file = os.getenv('LOG_FILE')
-        
+
         # Qdrant settings
         if os.getenv('QDRANT_HOST'):
             self.config.qdrant.host = os.getenv('QDRANT_HOST')
-        
+
         if os.getenv('QDRANT_PORT'):
             try:
                 self.config.qdrant.port = int(os.getenv('QDRANT_PORT'))
             except ValueError:
                 pass
-        
+
         if os.getenv('QDRANT_API_KEY'):
             self.config.qdrant.api_key = os.getenv('QDRANT_API_KEY')
-        
-        # Embedding settings  
+
+        # Embedding settings
         if os.getenv('EMBEDDING_MODEL'):
             self.config.embedding.model_name = os.getenv('EMBEDDING_MODEL')
-        
+
         if os.getenv('EMBEDDING_DEVICE'):
             self.config.embedding.device = os.getenv('EMBEDDING_DEVICE')
 
     def _validate_config(self):
         """Validate configuration values."""
         errors = []
-        
+
         # Validate Qdrant settings
         if self.config.qdrant.port < 1 or self.config.qdrant.port > 65535:
             errors.append(f"Invalid Qdrant port: {self.config.qdrant.port}")
-        
+
         if self.config.qdrant.timeout < 1:
             errors.append(f"Invalid Qdrant timeout: {self.config.qdrant.timeout}")
-        
+
         # Validate embedding settings
         if not self.config.embedding.model_name:
             errors.append("Embedding model name cannot be empty")
-        
+
         # Validate thresholds
         if not (0.0 <= self.config.deduplication.similarity_threshold <= 1.0):
             errors.append(f"Invalid similarity threshold: {self.config.deduplication.similarity_threshold}")
-        
+
         if not (0.0 <= self.config.memory.type_confidence_threshold <= 1.0):
             errors.append(f"Invalid confidence threshold: {self.config.memory.type_confidence_threshold}")
-        
+
         # Validate chunk sizes
         if self.config.markdown.chunk_size < 100:
             errors.append(f"Chunk size too small: {self.config.markdown.chunk_size}")
-        
+
         if self.config.markdown.chunk_overlap >= self.config.markdown.chunk_size:
             errors.append("Chunk overlap must be smaller than chunk size")
-        
+
         if errors:
             error_msg = "Configuration validation failed:\n" + "\n".join(f"  - {error}" for error in errors)
             raise ValueError(error_msg)
@@ -290,16 +290,16 @@ class ConfigManager:
     def save_config(self, path: Optional[Union[str, Path]] = None):
         """Save current configuration to YAML file."""
         save_path = Path(path) if path else self.config_path
-        
+
         if not save_path:
             raise ValueError("No save path specified")
-        
+
         config_dict = self._config_to_dict()
-        
+
         save_path.parent.mkdir(parents=True, exist_ok=True)
         with open(save_path, 'w', encoding='utf-8') as f:
             yaml.dump(config_dict, f, default_flow_style=False, sort_keys=True)
-        
+
         logging.getLogger(__name__).info(f"Configuration saved to {save_path}")
 
     def _config_to_dict(self) -> Dict[str, Any]:
@@ -382,7 +382,7 @@ SERVER_DESCRIPTION = config.description
 # MCP Protocol Version
 MCP_PROTOCOL_VERSION = config.protocol_version
 
-# Logging Configuration  
+# Logging Configuration
 LOGGING_LEVEL = getattr(logging, config.log_level.value)
 LOGGING_FORMAT = config.log_format
 
@@ -422,7 +422,7 @@ POLICY_HASH_ALGORITHM = config.policy.hash_algorithm
 MEMORY_TYPE_CONFIDENCE_THRESHOLD = config.memory.type_confidence_threshold
 MEMORY_TYPE_SUGGESTION_ENABLED = config.memory.suggestion_enabled
 
-# Deduplication Configuration  
+# Deduplication Configuration
 DEDUPLICATION_SIMILARITY_THRESHOLD = config.deduplication.similarity_threshold
 DEDUPLICATION_NEAR_MISS_THRESHOLD = config.deduplication.near_miss_threshold
 DEDUPLICATION_LOGGING_ENABLED = config.deduplication.logging_enabled
